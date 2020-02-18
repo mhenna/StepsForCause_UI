@@ -23,6 +23,8 @@
 # Flutter/Dart/Pub related
 **/doc/api/
 .dart_tool/
+.gradle/
+gradle/
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
