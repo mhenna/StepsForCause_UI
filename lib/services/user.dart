@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:root_checker/root_checker.dart';
 
-
 enum AuthStatus { undeterminate, authenticated, unauthenticated, unverified }
 
 class Profile {
@@ -261,6 +260,8 @@ class UserService with ChangeNotifier {
   }
 
   Future<void> signOut() async {
+//    Position position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+//    print ("POSITION IS " + position.toString());
     await _auth.signOut();
   }
 

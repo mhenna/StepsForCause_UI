@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -6,10 +7,25 @@ import 'package:Steps4Cause/landing.dart';
 import 'package:Steps4Cause/services/user.dart';
 import 'package:provider/provider.dart';
 import 'package:splashscreen/splashscreen.dart';
+import 'package:geolocator/geolocator.dart';
+
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
+    /**********************************************************************************************************************
+    ************************** This code segment listens on location changes of the device ********************************
+     * ********************************************************************************************************************
+     */
+    var geolocator = Geolocator();
+    var locationOptions = LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 10);
+
+    StreamSubscription<Position> positionStream = geolocator.getPositionStream(locationOptions).listen(
+            (Position position) {
+          print(position == null ? 'Unknown' : position.latitude.toString() + ', ' + position.longitude.toString());
+        });
+
     return ChangeNotifierProvider<UserService>(
       create: (context) => UserService.instance(),
       child: MaterialApp(
@@ -52,8 +68,8 @@ class StartupWidget extends StatelessWidget {
            * ****************** All emulators are rooted by default so comment  ************************
            * ****************** out the if else statement **********************************************
            */
-          if (snapshotRoot.hasData) {
-            if (!snapshotRoot.data) {
+//          if (snapshotRoot.hasData) {
+//            if (!snapshotRoot.data) {
               print("DEVICE IS NOT ROOTED");
               return new FutureBuilder(
                   future: userService.isCurrentUserVerified(),
@@ -71,10 +87,10 @@ class StartupWidget extends StatelessWidget {
                         return MyLandingPage();
                     }
                   });
-            } else {
-              return DialogWidget();
-            }
-          }
+//            } else {
+//              return DialogWidget();
+//            }
+//          }
          return Container();
         },
     );
