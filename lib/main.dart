@@ -69,7 +69,7 @@ class StartupWidget extends StatelessWidget {
            */
         if (snapshotRoot.hasData) {
           if (!snapshotRoot.data) {
-            print("DEVICE IS NOT ROOTED");
+//            print("DEVICE IS NOT ROOTED");
             // Listener which listens on the status change
             return new StreamBuilder(
                 stream: service.userService.subject.stream,

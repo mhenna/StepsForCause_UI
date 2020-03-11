@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:root_checker/root_checker.dart';
@@ -86,6 +86,7 @@ class UserService with ChangeNotifier {
   Profile get user => _profile;
   BehaviorSubject<AuthStatus> subject;
   GoogleSignIn googleSignIn = GoogleSignIn();
+  FacebookLogin fbLogin = FacebookLogin();
 
   UserService.instance()
       : auth = FirebaseAuth.instance,
@@ -132,8 +133,7 @@ class UserService with ChangeNotifier {
     await user.sendEmailVerification();
   }
 
-  Future<String> signInWithGoogle(BuildContext context) async {
-    // final userService = Provider.of<UserService>(context, listen: false);
+  Future<String> signInWithGoogle() async {
     final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
     final GoogleSignInAuthentication googleSignInAuthentication =
         await googleSignInAccount.authentication;
@@ -153,23 +153,56 @@ class UserService with ChangeNotifier {
     return 'signInWithGoogle succeeded: $user';
   }
 
+  Future<String> signInWithFacebook() async {
+    FirebaseUser currentUser;
+
+    final FacebookLoginResult facebookLoginResult =
+        await fbLogin.logIn(['email']);
+    FacebookAccessToken facebookAccessToken = facebookLoginResult.accessToken;
+    print(facebookLoginResult.status.toString());
+    final AuthCredential credential = FacebookAuthProvider.getCredential(
+        accessToken: facebookAccessToken.token);
+    final AuthResult authResult = await auth.signInWithCredential(credential);
+    final FirebaseUser user = authResult.user;
+    assert(!user.isAnonymous);
+    assert(await user.getIdToken() != null);
+    currentUser = await auth.currentUser();
+    assert(user.uid == currentUser.uid);
+    await addSocialMediaAccount(currentUser);
+    return 'Facebook succeeded: $user';
+  }
+
   void signOutGoogle() async {
     await googleSignIn.signOut();
 
     print("User Sign Out");
   }
 
+  void signOutFacebook() async {
+    await fbLogin.logOut();
+  }
+
   Future<void> addSocialMediaAccount(FirebaseUser user) async {
-    DocumentReference refFirestore =
-        _firestore.collection("/users").document(user.uid);
-    return refFirestore.setData({
-      'uid': user.uid,
-      'email': user.email,
-      'stepCount': 0,
-      'name': user.displayName,
-      "photoURL": user.photoUrl,
-      'isAdmin': false
+    bool userExists = false;
+
+    await _firestore.collection("/users").document(user.uid).get().then((u) {
+      userExists = u.exists;
     });
+
+    if (!userExists) {
+      DocumentReference refFirestore =
+      _firestore.collection("/users").document(user.uid);
+
+
+      return refFirestore.setData({
+        'uid': user.uid,
+        'email': user.email,
+        'stepCount': 0,
+        'name': user.displayName,
+        "photoURL": user.photoUrl,
+        'isAdmin': false
+      });
+    }
   }
 
   Future<void> _onSignUp(FirebaseUser user, String name, var photo) async {
@@ -208,6 +241,8 @@ class UserService with ChangeNotifier {
 
   Future<void> signOut() async {
     await auth.signOut();
+    signOutFacebook();
+    signOutGoogle();
     _status = AuthStatus.unauthenticated;
     subject.add(_status);
   }
@@ -225,12 +260,18 @@ class UserService with ChangeNotifier {
       try {
         user.reload();
       } catch (Exception) {
+        print('exception user.reload()');
         _status = AuthStatus.unauthenticated;
       }
+
       if (user == null) {
         _status = AuthStatus.unauthenticated;
       } else if (!user.isEmailVerified) {
         _status = AuthStatus.unverified;
+        user.providerData.forEach((u) {
+          if (u.providerId == 'facebook.com')
+            _status = AuthStatus.authenticated;
+        });
       } else if (user.isEmailVerified &&
           _profile.isloggedIn &&
           user.uid == _profile.id) {

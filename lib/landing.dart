@@ -159,8 +159,10 @@ class MyLandingPage extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(right: 30),
                         child: InkWell(
-                          onTap: () {
-                            _showDialog("Facebook", "Sign up with facebook?");
+                          onTap: () async {
+                            final service =
+                                Provider.of<Services>(context, listen: false);
+                            await service.userService.signInWithFacebook();
                           },
                           child: _facebookTest(),
                         ),
@@ -169,7 +171,7 @@ class MyLandingPage extends StatelessWidget {
                         onTap: () {
                           final service =
                               Provider.of<Services>(context, listen: false);
-                          service.userService.signInWithGoogle(context);
+                          service.userService.signInWithGoogle();
                         },
                         child: _google(),
                       )

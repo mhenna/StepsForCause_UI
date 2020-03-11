@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:social_share_plugin/social_share_plugin.dart';
+//import 'package:social_share_plugin/social_share_plugin.dart';
 
 class SocialSharePage extends StatefulWidget {
   @override
@@ -27,7 +27,7 @@ class _SocialSharePage extends State<SocialSharePage>
 
   void testSocialShare() async {
     File file = await ImagePicker.pickImage(source: ImageSource.gallery);
-    await SocialSharePlugin.shareToFeedInstagram(path: file.path);
+//    await SocialSharePlugin.shareToFeedInstagram(path: file.path);
     // await SocialSharePlugin.shareToFeedFacebookLink(
     //     quote: 'quote', url: 'https://flutter.dev');
   }
