@@ -135,10 +135,8 @@ class MyLandingPage extends StatelessWidget {
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(36.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
+            padding: const EdgeInsets.only(left: 36.0, top: 66.0, right: 36.0, bottom: 10.0),
+            child: ListView(
               children: <Widget>[
                 SizedBox(
                   height: 35.0,
