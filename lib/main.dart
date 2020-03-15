@@ -67,8 +67,8 @@ class StartupWidget extends StatelessWidget {
            * ****************** All emulators are rooted by default so comment  ************************
            * ****************** out the if else statement **********************************************
            */
-        if (snapshotRoot.hasData) {
-          if (!snapshotRoot.data) {
+//        if (snapshotRoot.hasData) {
+//          if (!snapshotRoot.data) {
 //            print("DEVICE IS NOT ROOTED");
             // Listener which listens on the status change
             return new StreamBuilder(
@@ -84,11 +84,11 @@ class StartupWidget extends StatelessWidget {
                       return MyLandingPage();
                   }
                 });
-          } else {
-            return DialogWidget();
-          }
-        }
-        return Container();
+//          } else {
+//            return DialogWidget();
+//          }
+//        }
+//        return Container();
       },
     );
   }

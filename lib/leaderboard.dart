@@ -7,12 +7,7 @@ class MyLeaderboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final totalStepCountUsers = Provider.of<int>(context);
     final topTenboard = Provider.of<List<dynamic>>(context);
-    String totalStepCountTeams = Provider.of<String>(context);
-    int totalStepCount;
-
-    try {
-      totalStepCount = totalStepCountUsers + int.parse(totalStepCountTeams);
-    } catch (Exception) {}
+    int totalStepCount = totalStepCountUsers;
 
     final list = <Widget>[];
     list.add(Padding(

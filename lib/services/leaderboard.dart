@@ -3,14 +3,12 @@ import 'package:async/async.dart' show StreamGroup;
 
 class Leaderboard {
   Stream<int> totalStepCountUsers;
-  Stream<String> totalStepCountTeams;
   Stream<List<UserScore>> topTenboardUsers;
   Stream<List<UserScore>> topTenboardTeams;
   Stream<List<dynamic>> topTenboard;
   final _firestore = Firestore.instance;
 
   Leaderboard() {
-
     // get top ten users
     topTenboardUsers = _firestore
         .collection("users")
@@ -41,32 +39,6 @@ class Leaderboard {
       return topTenUsers;
     });
 
-    // get total steps of users
-    totalStepCountUsers = _firestore
-        .collection("users")
-        .orderBy('stepCount')
-        .snapshots()
-        .map((users) {
-      int totalSteps = 0;
-      users.documentChanges.forEach((user) {
-        totalSteps += user.document.data['stepCount'];
-      });
-      return totalSteps;
-    });
-
-    // get total steps of teams
-    totalStepCountTeams = _firestore
-        .collection("/teams")
-        .orderBy("totalSteps")
-        .snapshots()
-        .map((teams) {
-      int totalSteps = 0;
-      teams.documentChanges.forEach((team) {
-        totalSteps += team.document.data['totalSteps'];
-      });
-      return totalSteps.toString();
-    });
-
     // consolidate users and team members in one stream
     List<UserScore> topUsers = new List();
     topTenboard =
@@ -83,6 +55,14 @@ class Leaderboard {
       }
 
       return top.values.toList();
+    });
+
+    totalStepCountUsers = _firestore
+        .collection('totalSteps')
+        .document('steps')
+        .snapshots()
+        .map((d) {
+      return d.data.values.elementAt(0);
     });
   }
 }

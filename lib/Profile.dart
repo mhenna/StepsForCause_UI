@@ -76,12 +76,7 @@ class ChoiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextStyle textStyle = Theme.of(context).textTheme.display1;
     final totalStepCountUsers = Provider.of<int>(context);
-    String totalStepCountTeams = Provider.of<String>(context);
-    int totalStepCount;
-
-    try {
-      totalStepCount = totalStepCountUsers + int.parse(totalStepCountTeams);
-    } catch (Exception) {}
+    int totalStepCount = totalStepCountUsers;
 
     // getfile();
     final quotes = [

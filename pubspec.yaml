@@ -44,9 +44,8 @@ dependencies:
   carousel_slider: ^1.3.0
   path_provider: ^1.6.0
   percent_indicator: "^2.1.1"
-#  social_share_plugin: ^0.3.0+1
   flutter_facebook_login: ^3.0.0
-
+  network_image_to_byte: ^0.0.1
   rxdart: ^0.23.1 # optional
 
 dev_dependencies:

@@ -19,9 +19,10 @@ class Profile {
   var photo;
   String team;
   String id;
+  var photoURL;
 
   Profile(
-      {this.name, this.stepCount, this.email, this.photo, this.team, this.id});
+      {this.name, this.stepCount, this.email, this.photo, this.team, this.id, this.photoURL});
 
   factory Profile.fromMap(Map data) {
     data = data ?? {};
@@ -31,6 +32,7 @@ class Profile {
         email: data['email'] ?? '',
         photo: data['photo'] ?? '',
         team: data['team'] ?? '',
+        photoURL: data['photoURL'] ?? '',
         id: data['uid'] ?? '');
   }
 
@@ -40,6 +42,8 @@ class Profile {
     stepCount = map["stepCount"];
     photo = map["photo"];
     if (photo == null) photo = "";
+    photoURL = map["photoURL"];
+    if (photoURL == null) photoURL = "";
     isloggedIn = false;
     team = map["team"];
     id = map['uid'];
@@ -58,6 +62,9 @@ class Profile {
         "\n" +
         "\tphoto: " +
         photo.toString() +
+        "\n" +
+        "\tphotoURL: " +
+        photoURL.toString() +
         "\n" +
         "\tisloggedIn: " +
         isloggedIn.toString() +
@@ -149,7 +156,7 @@ class UserService with ChangeNotifier {
     assert(await user.getIdToken() != null);
     final FirebaseUser currentUser = await auth.currentUser();
     assert(user.uid == currentUser.uid);
-    await addSocialMediaAccount(currentUser);
+    await addSocialMediaAccount(currentUser, null);
     return 'signInWithGoogle succeeded: $user';
   }
 
@@ -168,7 +175,7 @@ class UserService with ChangeNotifier {
     assert(await user.getIdToken() != null);
     currentUser = await auth.currentUser();
     assert(user.uid == currentUser.uid);
-    await addSocialMediaAccount(currentUser);
+    await addSocialMediaAccount(currentUser, 'facebook');
     return 'Facebook succeeded: $user';
   }
 
@@ -182,7 +189,7 @@ class UserService with ChangeNotifier {
     await fbLogin.logOut();
   }
 
-  Future<void> addSocialMediaAccount(FirebaseUser user) async {
+  Future<void> addSocialMediaAccount(FirebaseUser user, String type) async {
     bool userExists = false;
 
     await _firestore.collection("/users").document(user.uid).get().then((u) {
@@ -199,7 +206,7 @@ class UserService with ChangeNotifier {
         'email': user.email,
         'stepCount': 0,
         'name': user.displayName,
-        "photoURL": user.photoUrl,
+        "photoURL": type == null ? user.photoUrl : user.photoUrl + "?type=large",
         'isAdmin': false
       });
     }
@@ -296,6 +303,7 @@ class UserService with ChangeNotifier {
     final profile = Profile.fromMap(data);
     _profile = profile;
     _profile.mapToProfile(data);
+    _profile.printProfile();
     if (u.isEmailVerified && profile != null) {
       _status = AuthStatus.authenticated;
       subject.add(_status);

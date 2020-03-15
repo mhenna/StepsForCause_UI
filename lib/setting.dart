@@ -1,9 +1,10 @@
 import 'dart:typed_data';
-
+import 'dart:ui';
+import 'package:Steps4Cause/main.dart';
 import 'package:Steps4Cause/services/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:Steps4Cause/services/user.dart';
+import 'package:network_image_to_byte/network_image_to_byte.dart';
 import 'package:provider/provider.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -27,19 +28,19 @@ class MapScreenState extends State<SettingsPage>
   void setAvatar(image) {
     imageBytes = image;
     final UriData data = Uri.parse(imageBytes).data;
-    print(data.isBase64);
     bytes = data.contentAsBytes();
     setState(() {
       image64 = bytes;
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final service = Provider.of<Services>(context);
-    var avatar = service.userService.user.photo;
-    if (avatar != '') setAvatar(avatar);
-    return new Scaffold(
+  Future<Uint8List> setAvatarFromUrl(String url) async {
+    Uint8List byteImage = await networkImageToByte(url);
+    return byteImage;
+  }
+
+  Widget constructPage(context, service, image64) {
+    Widget widget = new Scaffold(
         body: new Container(
       color: Colors.white,
       child: new ListView(
@@ -52,19 +53,7 @@ class MapScreenState extends State<SettingsPage>
                 child: new Column(
                   children: <Widget>[
                     Padding(
-                        padding: EdgeInsets.only(left: 20.0, top: 20.0),
-                        child: new Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            new Icon(
-                              Icons.arrow_back_ios,
-                              color: Colors.black,
-                              size: 22.0,
-                            ),
-                          ],
-                        )),
-                    Padding(
-                      padding: EdgeInsets.only(top: 20.0),
+                      padding: EdgeInsets.only(top: 60.0),
                       child: new Stack(fit: StackFit.loose, children: <Widget>[
                         new Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -72,8 +61,8 @@ class MapScreenState extends State<SettingsPage>
                           children: <Widget>[
                             if (image64 != null)
                               new Container(
-                                  width: 140.0,
-                                  height: 140.0,
+                                  width: 165.0,
+                                  height: 165.0,
                                   decoration: new BoxDecoration(
                                     shape: BoxShape.circle,
                                     image: new DecorationImage(
@@ -84,8 +73,8 @@ class MapScreenState extends State<SettingsPage>
                             else
                               new Container(
                                   //empty image
-                                  width: 140.0,
-                                  height: 140.0,
+                                  width: 165.0,
+                                  height: 165.0,
                                   decoration: new BoxDecoration(
                                     shape: BoxShape.circle,
                                     image: new DecorationImage(
@@ -96,21 +85,6 @@ class MapScreenState extends State<SettingsPage>
                                   )),
                           ],
                         ),
-                        Padding(
-                            padding: EdgeInsets.only(top: 90.0, right: 100.0),
-                            child: new Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                new CircleAvatar(
-                                  backgroundColor: Colors.red,
-                                  radius: 25.0,
-                                  child: new Icon(
-                                    Icons.camera_alt,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              ],
-                            )),
                       ]),
                     )
                   ],
@@ -126,35 +100,7 @@ class MapScreenState extends State<SettingsPage>
                     children: <Widget>[
                       Padding(
                           padding: EdgeInsets.only(
-                              left: 25.0, right: 25.0, top: 25.0),
-                          child: new Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                              new Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  new Text(
-                                    'Parsonal Information',
-                                    style: TextStyle(
-                                        fontSize: 18.0,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              new Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  _status ? _getEditIcon() : new Container(),
-                                ],
-                              )
-                            ],
-                          )),
-                      Padding(
-                          padding: EdgeInsets.only(
-                              left: 25.0, right: 25.0, top: 25.0),
+                              left: 25.0, right: 25.0, top: 45.0),
                           child: new Row(
                             mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
@@ -165,69 +111,7 @@ class MapScreenState extends State<SettingsPage>
                                   new Text(
                                     'Name',
                                     style: TextStyle(
-                                        fontSize: 16.0,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          )),
-                      Padding(
-                          padding: EdgeInsets.only(
-                              left: 25.0, right: 25.0, top: 2.0),
-                          child: new Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                              new Flexible(
-                                child: new Text(service.userService.user.name),
-                              ),
-                            ],
-                          )),
-                      Padding(
-                          padding: EdgeInsets.only(
-                              left: 25.0, right: 25.0, top: 25.0),
-                          child: new Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                              new Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  new Text(
-                                    'Email ID',
-                                    style: TextStyle(
-                                        fontSize: 16.0,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          )),
-                      Padding(
-                          padding: EdgeInsets.only(
-                              left: 25.0, right: 25.0, top: 2.0),
-                          child: new Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                              new Flexible(
-                                child: new Text(service.userService.user.email),
-                              ),
-                            ],
-                          )),
-                      Padding(
-                          padding: EdgeInsets.only(
-                              left: 25.0, right: 25.0, top: 25.0),
-                          child: new Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                              new Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  new Text(
-                                    'Total Steps',
-                                    style: TextStyle(
-                                        fontSize: 16.0,
+                                        fontSize: 22.0,
                                         fontWeight: FontWeight.bold),
                                   ),
                                 ],
@@ -242,7 +126,75 @@ class MapScreenState extends State<SettingsPage>
                             children: <Widget>[
                               new Flexible(
                                 child: new Text(
-                                    service.userService.user.stepCount.toString()),
+                                  service.userService.user.name,
+                                  style: TextStyle(fontSize: 18.0),
+                                ),
+                              ),
+                            ],
+                          )),
+                      Padding(
+                          padding: EdgeInsets.only(
+                              left: 25.0, right: 25.0, top: 45.0),
+                          child: new Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              new Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  new Text(
+                                    'Email ID',
+                                    style: TextStyle(
+                                        fontSize: 22.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )),
+                      Padding(
+                          padding: EdgeInsets.only(
+                              left: 25.0, right: 25.0, top: 2.0),
+                          child: new Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              new Flexible(
+                                child: new Text(service.userService.user.email,
+                                    style: TextStyle(fontSize: 18.0)),
+                              ),
+                            ],
+                          )),
+                      Padding(
+                          padding: EdgeInsets.only(
+                              left: 25.0, right: 25.0, top: 45.0),
+                          child: new Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              new Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  new Text(
+                                    'Total Steps',
+                                    style: TextStyle(
+                                        fontSize: 22.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )),
+                      Padding(
+                          padding: EdgeInsets.only(
+                              left: 25.0, right: 25.0, top: 2.0),
+                          child: new Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              new Flexible(
+                                child: new Text(
+                                  service.userService.user.stepCount.toString(),
+                                  style: TextStyle(fontSize: 18.0),
+                                ),
                               ),
                             ],
                           )),
@@ -256,6 +208,34 @@ class MapScreenState extends State<SettingsPage>
         ],
       ),
     ));
+    return widget;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final service = Provider.of<Services>(context);
+    var avatar;
+    Widget widget;
+    if (service.userService.user.photo != '') {
+      avatar = service.userService.user.photo;
+      setAvatar(avatar);
+      widget = constructPage(context, service, image64);
+      return widget;
+    } else if (service.userService.user.photoURL != '') {
+      avatar = service.userService.user.photoURL;
+      return new FutureBuilder(
+        initialData: image64,
+        future: setAvatarFromUrl(avatar),
+        builder: (context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData) {
+            image64 = snapshot.data;
+            widget = constructPage(context, service, image64);
+            return widget;
+          }
+          return LoadingWidget();
+        },
+      );
+    }
   }
 
   @override
